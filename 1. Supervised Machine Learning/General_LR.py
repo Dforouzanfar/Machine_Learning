@@ -27,7 +27,10 @@ def compute_cost(x, y, w, b, model=compute_model):
         total_cost (float): The cost of using w,b as the parameters for linear regression
                to fit the data points in x and y
     """
-    m = x.shape[0]  # number of rows
+    if len(x.shape) == 1:
+        m, n = x.shape[0], 0
+    else:
+        m, n = x.shape
     cost = 0
     f_wb = model(x, w, b)  # ndarray of predictions
     error = (f_wb - y) ** 2
@@ -50,24 +53,21 @@ def compute_gradient(x, y, w, b, model=compute_model):
       dj_dw (scalar): The gradient of the cost w.r.t. the parameters w
       dj_db (scalar): The gradient of the cost w.r.t. the parameter b
      """
+    m = x.shape[0]
+    dj_db = 0  # Gradients
+    f_wb = model(x, w, b)  # ndarray of predictions
+    err = f_wb - y
 
     if len(x.shape) == 1:
-        m, n = x.shape[0], 0
-        dj_dw, dj_db = 0, 0  # Gradients
-        f_wb = model(x, w, b)  # ndarray of predictions
-        err = f_wb - y
-
+        dj_dw = 0
         for i in range(m):
             dj_dw += err[i] * x[i]
             dj_db += err[i]
         dj_dw /= m
         dj_db /= m
     else:
-        m, n = x.shape
+        n = x.shape[1]
         dj_dw = np.zeros((n,))
-        dj_db = 0
-        f_wb = model(x, w, b)  # ndarray of predictions
-        err = f_wb - y
 
         for i in range(m):
             for j in range(n):
@@ -79,7 +79,7 @@ def compute_gradient(x, y, w, b, model=compute_model):
     return dj_dw, dj_db
 
 # 4
-def gradient_descent(x, y, w_in, b_in, alpha, num_iters, model=compute_model, cost_function=compute_cost,
+def gradient_descent(x, y, w, b, alpha, num_iters, model=compute_model, cost_function=compute_cost,
                      gradient_function=compute_gradient):
     """
     Args:
@@ -100,8 +100,8 @@ def gradient_descent(x, y, w_in, b_in, alpha, num_iters, model=compute_model, co
 
     J_history = []  # An array to store cost J at each iteration primarily for graphing later
     p_history = []  # An array to store w and b at each iteration primarily for graphing later
-    b = b_in
-    w = copy.deepcopy(w_in)
+    b = b
+    w = copy.deepcopy(w)
     ceil = math.ceil(num_iters / 10)  # Recall: math.ceil: Round a number upward to its nearest integer:
 
     for i in range(num_iters + 1):
